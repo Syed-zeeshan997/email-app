@@ -29,6 +29,7 @@ const Login = () => {
     setLoading(true);
     try {
       const data = await login(form);
+      console.log(data);
       toast.success('Welcome back!');
       navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {
