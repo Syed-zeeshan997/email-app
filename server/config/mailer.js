@@ -20,6 +20,8 @@ const createTransporter = () => {
  */
 const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   const transporter = createTransporter();
+  await transporter.verify();
+  console.log("SMTP Connected");
 
   const mailOptions = {
     from: `"Email App" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
