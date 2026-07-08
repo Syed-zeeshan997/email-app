@@ -8,6 +8,16 @@ const API = axios.create({
   },
 });
 
+// Request interceptor: cookie fail ho (mobile Safari ITP) to bhi
+// localStorage token Authorization header me bhej do — server dono accept karta hai
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Response interceptor for global error handling
 API.interceptors.response.use(
   (response) => response,

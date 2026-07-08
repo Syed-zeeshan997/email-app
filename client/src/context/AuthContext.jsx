@@ -24,18 +24,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials);
+    if (data.token) localStorage.setItem('token', data.token);
     setUser(data.user);
     return data;
   };
 
   const register = async (userData) => {
     const { data } = await authService.register(userData);
+    if (data.token) localStorage.setItem('token', data.token);
     setUser(data.user);
     return data;
   };
 
   const logout = async () => {
     await authService.logout();
+    localStorage.removeItem('token');
     setUser(null);
   };
 

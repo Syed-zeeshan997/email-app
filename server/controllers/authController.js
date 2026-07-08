@@ -81,11 +81,12 @@ const login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
 
     res.json({
       success: true,
       message: 'Login successful',
+      token, // mobile/Safari fallback: client localStorage me store karega
       user: {
         id: user._id,
         name: user.name,
@@ -106,8 +107,11 @@ const login = async (req, res, next) => {
  * @route   POST /api/logout
  */
 const logout = (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('token', '', {
     httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     expires: new Date(0),
   });
   res.json({ success: true, message: 'Logged out successfully' });

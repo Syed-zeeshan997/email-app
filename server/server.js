@@ -22,9 +22,22 @@ app.set('trust proxy',1);
 
 // Security middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/$/, ''));
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Postman/curl jaise no-origin requests allow karo
+      if (!origin) return callback(null, true);
+      const normalized = origin.replace(/\/$/, '');
+      if (allowedOrigins.includes(normalized)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
@@ -56,7 +69,9 @@ app.get('/api/health', (req, res) => {
 // Serve React build in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('*', (req, res) => {
+  // app.use() (na ki app.get('*', ...)) taaki Express 4 aur 5 dono me kaam kare —
+  // Express 5 me bare '*' route path-to-regexp crash deta hai
+  app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
   });
 }

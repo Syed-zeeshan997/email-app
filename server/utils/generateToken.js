@@ -11,11 +11,12 @@ const generateToken = (res, userId) => {
 
   const cookieExpireDays = parseInt(process.env.JWT_COOKIE_EXPIRE, 10) || 7;
 
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-    secure: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: cookieExpireDays * 24 * 60 * 60 * 1000,
   });
 
